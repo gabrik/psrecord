@@ -89,6 +89,9 @@ def main():
     parser.add_argument('--csv', type=str,
                         help='output the statistics to a csv file')
 
+    parser.add_argument('--name', type=str,
+                        help='a name associated to this samples')
+
     args = parser.parse_args()
 
     # Attach to process
@@ -112,7 +115,7 @@ def main():
 
 
 def monitor(pid, logfile=None, plot=None, duration=None, interval=None,
-            include_children=False, csv=None):
+            include_children=False, csv=None, name=None):
 
     # We import psutil here so that the module can be imported even if psutil
     # is not present (for example if accessing the version)
@@ -138,8 +141,11 @@ def monitor(pid, logfile=None, plot=None, duration=None, interval=None,
     log['mem_real'] = []
     log['mem_virtual'] = []
 
+    if name is not None:
+        name = pid
+
     if csv:
-        header = ['time', 'cpu', 'mem_real', 'mem_virtual']
+        header = ['time', 'cpu', 'mem_real', 'mem_virtual','name']
         csv_file = open(csv,'w')
         writer = libcsv.writer(csv_file)
         writer.writerow(header)
@@ -199,7 +205,7 @@ def monitor(pid, logfile=None, plot=None, duration=None, interval=None,
                 f.flush()
 
             if csv:
-                data = [current_time-start_time, current_cpu, current_mem_real, current_mem_virtual]
+                data = [current_time-start_time, current_cpu, current_mem_real, current_mem_virtual, name]
                 writer.writerow(data)
                 csv_file.flush()
 
