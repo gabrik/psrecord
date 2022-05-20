@@ -153,6 +153,8 @@ def monitor(pid, logfile=None, plot=None, duration=None, interval=None,
 
     try:
 
+        sample_number = 0
+
         # Start main event loop
         while True:
 
@@ -204,15 +206,16 @@ def monitor(pid, logfile=None, plot=None, duration=None, interval=None,
                     current_mem_virtual))
                 f.flush()
 
-            if csv:
-                data = [current_time-start_time, current_cpu, current_mem_real, current_mem_virtual, name]
-                writer.writerow(data)
-                csv_file.flush()
-
-
 
             if interval is not None:
                 time.sleep(interval)
+
+            if csv:
+                data = [current_time - start_time, current_cpu, current_mem_real, current_mem_virtual, name]
+                if interval is not None:
+                    data = [sample_number, current_cpu, current_mem_real, current_mem_virtual, name]
+                writer.writerow(data)
+                csv_file.flush()
 
             # If plotting, record the values
             if plot:
@@ -220,6 +223,8 @@ def monitor(pid, logfile=None, plot=None, duration=None, interval=None,
                 log['cpu'].append(current_cpu)
                 log['mem_real'].append(current_mem_real)
                 log['mem_virtual'].append(current_mem_virtual)
+
+            sample_number = sample_number + interval
 
     except KeyboardInterrupt:  # pragma: no cover
         pass
