@@ -108,7 +108,7 @@ def main():
         pid = sprocess.pid
 
     monitor(pid, logfile=args.log, plot=args.plot, duration=args.duration,
-            interval=args.interval, include_children=args.include_children, csv=args.csv)
+            interval=args.interval, include_children=args.include_children, csv=args.csv, name=args.name)
 
     if sprocess is not None:
         sprocess.kill()
