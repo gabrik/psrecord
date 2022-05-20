@@ -141,7 +141,7 @@ def monitor(pid, logfile=None, plot=None, duration=None, interval=None,
     log['mem_real'] = []
     log['mem_virtual'] = []
 
-    if name is not None:
+    if name is None:
         name = pid
 
     if csv:
