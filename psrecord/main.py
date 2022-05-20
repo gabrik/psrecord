@@ -28,6 +28,7 @@ from __future__ import (unicode_literals, division, print_function,
 
 import time
 import argparse
+import csv as libcsv
 
 children = []
 
@@ -85,6 +86,9 @@ def main():
                              'in a slower maximum sampling rate).',
                         action='store_true')
 
+    parser.add_argument('--csv', type=str,
+                        help='output the statistics to a csv file')
+
     args = parser.parse_args()
 
     # Attach to process
@@ -101,14 +105,14 @@ def main():
         pid = sprocess.pid
 
     monitor(pid, logfile=args.log, plot=args.plot, duration=args.duration,
-            interval=args.interval, include_children=args.include_children)
+            interval=args.interval, include_children=args.include_children, csv=args.csv)
 
     if sprocess is not None:
         sprocess.kill()
 
 
 def monitor(pid, logfile=None, plot=None, duration=None, interval=None,
-            include_children=False):
+            include_children=False, csv=None):
 
     # We import psutil here so that the module can be imported even if psutil
     # is not present (for example if accessing the version)
@@ -133,6 +137,13 @@ def monitor(pid, logfile=None, plot=None, duration=None, interval=None,
     log['cpu'] = []
     log['mem_real'] = []
     log['mem_virtual'] = []
+
+    if csv:
+        header = ['time', 'cpu', 'mem_real', 'mem_virtual']
+        csv_file = open(csv,'w')
+        writer = libcsv.writer(csv_file)
+        writer.writerow(header)
+
 
     try:
 
@@ -187,6 +198,13 @@ def monitor(pid, logfile=None, plot=None, duration=None, interval=None,
                     current_mem_virtual))
                 f.flush()
 
+            if csv:
+                data = [current_time-start_time, current_cpu, current_mem_real, current_mem_virtual]
+                writer.writerow(data)
+                csv_file.flush()
+
+
+
             if interval is not None:
                 time.sleep(interval)
 
@@ -202,6 +220,9 @@ def monitor(pid, logfile=None, plot=None, duration=None, interval=None,
 
     if logfile:
         f.close()
+
+    if csv:
+        csv_file.close()
 
     if plot:
 
